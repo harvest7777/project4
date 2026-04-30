@@ -72,3 +72,39 @@
   docker logs node1
   ```
   Logs should show `http://node2:5000 is back online, added to peer list`
+
+---
+
+## Failure Handling
+
+- [ ] With node2 still down, store `color=red` via node1 — should reroute to node3 instead of failing
+  ```
+  curl -X POST http://localhost:5001/kv -H "Content-Type: application/json" -d '{"key": "color", "value": "red"}'
+  docker logs node1
+  ```
+  Logs should show `Forwarding PUT key='color' to http://node3:5000`
+
+- [ ] Retrieve `color` via node1 — should still resolve from node3
+  ```
+  curl http://localhost:5001/kv/color
+  docker logs node1
+  ```
+  Logs should show `Forwarding GET key='color' to http://node3:5000`
+
+---
+
+## Re-join
+
+- [ ] With node2 back online, store `color=blue` via node1 — should route back to node2
+  ```
+  curl -X POST http://localhost:5001/kv -H "Content-Type: application/json" -d '{"key": "color", "value": "blue"}'
+  docker logs node1
+  ```
+  Logs should show `Forwarding PUT key='color' to http://node2:5000`
+
+- [ ] Retrieve `color` via node1 — should resolve from node2 again
+  ```
+  curl http://localhost:5001/kv/color
+  docker logs node1
+  ```
+  Logs should show `Forwarding GET key='color' to http://node2:5000`
