@@ -24,7 +24,8 @@ peers_lock = threading.Lock()
 
 def responsible_node(key):
     with peers_lock:
-        pool = [MY_URL] + active_peers
+        alive = set(active_peers) | {MY_URL}
+    pool = [p for p in ALL_PEERS if p in alive]
     index = int(hashlib.sha1(key.encode()).hexdigest(), 16) % len(pool)
     return pool[index]
 
