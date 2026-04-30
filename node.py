@@ -1,6 +1,8 @@
 import hashlib
 import logging
 import os
+import threading
+import time
 
 import requests
 from flask import Flask, jsonify, request, send_from_directory
@@ -13,13 +15,42 @@ os.makedirs(STORAGE_DIR, exist_ok=True)
 
 store = {}
 
-PEERS = os.environ["PEERS"].split(",")
+ALL_PEERS = os.environ["PEERS"].split(",")
 MY_URL = os.environ["MY_URL"]
+
+active_peers = [p for p in ALL_PEERS if p != MY_URL]
+peers_lock = threading.Lock()
 
 
 def responsible_node(key):
-    index = int(hashlib.sha1(key.encode()).hexdigest(), 16) % len(PEERS)
-    return PEERS[index]
+    with peers_lock:
+        pool = [MY_URL] + active_peers
+    index = int(hashlib.sha1(key.encode()).hexdigest(), 16) % len(pool)
+    return pool[index]
+
+
+def health_check():
+    while True:
+        time.sleep(10)
+        for peer in ALL_PEERS:
+            if peer == MY_URL:
+                continue
+            try:
+                requests.get(f"{peer}/ping", timeout=2)
+                with peers_lock:
+                    if peer not in active_peers:
+                        active_peers.append(peer)
+                        app.logger.info(f"{peer} is back online, added to peer list")
+            except requests.exceptions.RequestException:
+                with peers_lock:
+                    if peer in active_peers:
+                        active_peers.remove(peer)
+                        app.logger.info(f"{peer} is unreachable, removed from peer list")
+
+
+@app.route('/ping', methods=['GET'])
+def ping():
+    return jsonify({"status": "ok"})
 
 
 @app.route('/upload', methods=['POST'])
@@ -58,4 +89,5 @@ def get_kv(key):
 
 
 if __name__ == "__main__":
+    threading.Thread(target=health_check, daemon=True).start()
     app.run(host="0.0.0.0", port=5000)

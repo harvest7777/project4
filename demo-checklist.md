@@ -48,3 +48,27 @@
   docker logs node1
   ```
   Logs should show `Forwarding GET key='dht-test' to http://node3:5000`
+
+---
+
+## Peer Health Monitoring
+
+- [ ] Kill node2 and confirm node1 detects it as unreachable
+  ```
+  docker stop node2
+  ```
+  Wait ~10 seconds, then:
+  ```
+  docker logs node1
+  ```
+  Logs should show `http://node2:5000 is unreachable, removed from peer list`
+
+- [ ] Bring node2 back and confirm node1 detects it as online
+  ```
+  docker start node2
+  ```
+  Wait ~10 seconds, then:
+  ```
+  docker logs node1
+  ```
+  Logs should show `http://node2:5000 is back online, added to peer list`
