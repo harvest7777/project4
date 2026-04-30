@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# uv / venv
+.venv/
+.python-version
+
+# IDE
+.idea/
+.vscode/
+
+# Node storage (runtime data, not source)
+storage/
+
+# macOS
+.DS_Store
