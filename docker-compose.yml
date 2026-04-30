@@ -1,0 +1,33 @@
+services:
+  node1:
+    build: .
+    container_name: node1
+    ports:
+      - "5001:5000"
+    volumes:
+      - ./storage/node1:/app/storage
+    environment:
+      - MY_URL=http://node1:5000
+      - PEERS=http://node1:5000,http://node2:5000,http://node3:5000
+
+  node2:
+    build: .
+    container_name: node2
+    ports:
+      - "5002:5000"
+    volumes:
+      - ./storage/node2:/app/storage
+    environment:
+      - MY_URL=http://node2:5000
+      - PEERS=http://node1:5000,http://node2:5000,http://node3:5000
+
+  node3:
+    build: .
+    container_name: node3
+    ports:
+      - "5003:5000"
+    volumes:
+      - ./storage/node3:/app/storage
+    environment:
+      - MY_URL=http://node3:5000
+      - PEERS=http://node1:5000,http://node2:5000,http://node3:5000
