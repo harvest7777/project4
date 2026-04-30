@@ -34,3 +34,17 @@
   docker logs node1
   ```
   Logs should show `Forwarding PUT key='dht-test' to http://node3:5000`
+
+- [ ] Get `color` from node1, confirm it routes to node2
+  ```
+  curl http://localhost:5001/kv/color
+  docker logs node1
+  ```
+  Logs should show `Forwarding GET key='color' to http://node2:5000`
+
+- [ ] Get `dht-test` from node1, confirm it routes to node3
+  ```
+  curl http://localhost:5001/kv/dht-test
+  docker logs node1
+  ```
+  Logs should show `Forwarding GET key='dht-test' to http://node3:5000`
