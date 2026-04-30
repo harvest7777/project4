@@ -1,5 +1,3 @@
-# Demo Checklist
-
 ## File Upload & Download
 
 - [ ] Upload a file to node1
@@ -26,11 +24,13 @@
 - [ ] Send `color=blue` to node1, confirm it routes to node2
   ```
   curl -X POST http://localhost:5001/kv -H "Content-Type: application/json" -d '{"key": "color", "value": "blue"}'
+  docker logs node1
   ```
-  Response should show `"node": "http://node2:5000"`
+  Logs should show `Forwarding PUT key='color' to http://node2:5000`
 
 - [ ] Send `dht-test=hello` to node1, confirm it routes to node3
   ```
   curl -X POST http://localhost:5001/kv -H "Content-Type: application/json" -d '{"key": "dht-test", "value": "hello"}'
+  docker logs node1
   ```
-  Response should show `"node": "http://node3:5000"`
+  Logs should show `Forwarding PUT key='dht-test' to http://node3:5000`
