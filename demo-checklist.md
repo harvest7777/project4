@@ -4,7 +4,7 @@
 
 - [ ] Upload a file to node1
   ```
-  curl -F "file=@yourfile.txt" http://localhost:5001/upload
+  curl -F "file=@test_file.txt" http://localhost:5001/upload
   ```
 - [ ] Show file exists inside node1's container
   ```
@@ -12,11 +12,11 @@
   ```
 - [ ] Download the file
   ```
-  curl -O http://localhost:5001/download/yourfile.txt
+  curl -O http://localhost:5001/download/test_file.txt
   ```
 - [ ] Show file saved locally
   ```
-  ls yourfile.txt
+  ls test_file.txt
   ```
 
 ---
