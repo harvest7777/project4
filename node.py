@@ -3,7 +3,7 @@ from flask import Flask, request, jsonify, send_from_directory
 
 app = Flask(__name__)
 
-STORAGE_DIR = "./storage"
+STORAGE_DIR = "/app/storage"
 os.makedirs(STORAGE_DIR, exist_ok=True)
 
 
@@ -20,4 +20,4 @@ def download_file(filename):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5001)
+    app.run(host="0.0.0.0", port=5000)
