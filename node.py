@@ -10,18 +10,23 @@ from flask import Flask, jsonify, request, send_from_directory
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
 
+# directory where uploaded files are stored
 STORAGE_DIR = "/app/storage"
 os.makedirs(STORAGE_DIR, exist_ok=True)
 
+# in-memory key-value store for this node
 store = {}
 
+# full peer list from env; MY_URL identifies this node
 ALL_PEERS = os.environ["PEERS"].split(",")
 MY_URL = os.environ["MY_URL"]
 
+# tracks which peers are currently reachable
 active_peers = [p for p in ALL_PEERS if p != MY_URL]
 peers_lock = threading.Lock()
 
 
+# SHA-1 hash the key to determine which node owns it
 def responsible_node(key):
     with peers_lock:
         alive = set(active_peers) | {MY_URL}
@@ -30,6 +35,7 @@ def responsible_node(key):
     return pool[index]
 
 
+# background thread: ping all peers every 10s, update active_peers accordingly
 def health_check():
     while True:
         time.sleep(10)
@@ -49,11 +55,13 @@ def health_check():
                         app.logger.info(f"{peer} is unreachable, removed from peer list")
 
 
+# health check endpoint used by peers to verify this node is alive
 @app.route('/ping', methods=['GET'])
 def ping():
     return jsonify({"status": "ok"})
 
 
+# save uploaded file to local storage
 @app.route('/upload', methods=['POST'])
 def upload_file():
     file = request.files['file']
@@ -61,11 +69,13 @@ def upload_file():
     return jsonify({"status": "uploaded", "filename": file.filename})
 
 
+# serve a file from local storage by filename
 @app.route('/download/<filename>', methods=['GET'])
 def download_file(filename):
     return send_from_directory(STORAGE_DIR, filename)
 
 
+# store a key-value pair; forward to responsible node if it's not this one
 @app.route('/kv', methods=['POST'])
 def put_kv():
     data = request.json
@@ -77,6 +87,7 @@ def put_kv():
     return jsonify({"status": "stored", "key": data['key']})
 
 
+# retrieve a value by key; forward to responsible node if it's not this one
 @app.route('/kv/<key>', methods=['GET'])
 def get_kv(key):
     owner = responsible_node(key)
@@ -90,5 +101,6 @@ def get_kv(key):
 
 
 if __name__ == "__main__":
+    # start health monitor in background before serving requests
     threading.Thread(target=health_check, daemon=True).start()
     app.run(host="0.0.0.0", port=5000)
